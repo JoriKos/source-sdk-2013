@@ -563,7 +563,6 @@ float CTFKatana::GetMeleeDamage( CBaseEntity *pTarget, int* piDamageType, int* p
 			{
 				fDamage = MAX( fDamage, pTFPlayerTarget->GetHealth() * 3 );
 				*piDamageType |= DMG_DONT_COUNT_DAMAGE_TOWARDS_CRIT_RATE;
-				*piCustomDamage = TF_DMG_CUSTOM_HONORBOUND_DUEL;
 			}
 		}
 	}

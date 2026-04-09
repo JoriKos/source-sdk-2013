@@ -6467,8 +6467,8 @@ bool CTFGameRules::ApplyOnDamageModifyRules( CTakeDamageInfo &info, CBaseEntity 
 		}
 	}
 
-	// Use defense buffs if it's not a backstab, Half-Zatoichi duel kill, or direct crush damage (telefrags, etc.)
-	if ( pVictim && info.GetDamageCustom() != TF_DMG_CUSTOM_BACKSTAB && info.GetDamageCustom() != TF_DMG_CUSTOM_HONORBOUND_DUEL && ( info.GetDamageType() & DMG_CRUSH ) == 0 )
+	// Use defense buffs if it's not a backstab or direct crush damage (telefrag, etc.)
+	if ( pVictim && info.GetDamageCustom() != TF_DMG_CUSTOM_BACKSTAB && ( info.GetDamageType() & DMG_CRUSH ) == 0 )
 	{
 		if ( pVictim->m_Shared.InCond( TF_COND_DEFENSEBUFF ) )
 		{
@@ -6487,7 +6487,10 @@ bool CTFGameRules::ApplyOnDamageModifyRules( CTakeDamageInfo &info, CBaseEntity 
 			info.SetCritType( CTakeDamageInfo::CRIT_NONE );
 		}
 
-		if ( !iAttackIgnoresResists )
+		// Reduce damage if not resist-piercing weapon or honorbound duel
+		if ( !iAttackIgnoresResists && !( pTFAttacker && pWeapon
+			&& pWeapon == pTFAttacker->GetActiveTFWeapon() && pWeapon->IsHonorBound()
+			&& pVictim->GetActiveTFWeapon() && pVictim->GetActiveTFWeapon()->IsHonorBound() ) )
 		{
 			// If we are defense buffed...
 			if ( pVictim->m_Shared.InCond( TF_COND_DEFENSEBUFF_HIGH ) )
@@ -7283,10 +7286,12 @@ float CTFGameRules::ApplyOnDamageAliveModifyRules( const CTakeDamageInfo &info, 
 		// Stomp flRealDamage with resist adjusted values
 		flRealDamage = flDamageBase + flDamageBonus;
 
-		bool isHonorboundDuel = pTFAttacker->GetActiveTFWeapon()->IsHonorBound() && pVictim->GetActiveTFWeapon()->IsHonorBound();
-
-		// Some Powerups apply a damage multiplier. Backstabs and Half-Zatoichi duel kills are immune to resist protection
-		if (pVictim && info.GetDamageCustom() != TF_DMG_CUSTOM_BACKSTAB && info.GetDamageCustom() != TF_DMG_CUSTOM_HONORBOUND_DUEL )
+		// Some Powerups apply a damage multiplier. Backstabs and honorbound duels are immune to resist protection
+		CTFWeaponBase *pWeapon = dynamic_cast<CTFWeaponBase *>( info.GetWeapon() );
+		if ( pVictim && info.GetDamageCustom() != TF_DMG_CUSTOM_BACKSTAB
+			&& !( pTFAttacker && pWeapon
+			&& pWeapon == pTFAttacker->GetActiveTFWeapon() && pWeapon->IsHonorBound()
+			&& pVictim->GetActiveTFWeapon() && pVictim->GetActiveTFWeapon()->IsHonorBound() ) )
 		{
 			// Plague bleed damage is immune from resist calculation
 			if ( ( !pVictim->m_Shared.InCond( TF_COND_PLAGUE ) && info.GetDamageCustom() != TF_DMG_CUSTOM_BLEEDING ) )
