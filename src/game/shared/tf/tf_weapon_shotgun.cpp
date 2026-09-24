@@ -286,7 +286,6 @@ void CTFShotgun_Revenge::Detach( void )
 	if ( pPlayer )
 	{
 		pPlayer->m_Shared.ResetRevengeCrits();
-		pPlayer->m_Shared.RemoveCond( TF_COND_REVENGECRITBOOSTED );
 	}
 
 	BaseClass::Detach();
